@@ -286,15 +286,28 @@ export class MiningProxy extends EventEmitter {
     miner.sharesSubmitted++;
     miner.lastActivity = new Date();
 
+    // 构建正确的份额提交消息，使用矿机授权时的用户名
+    const params = message.params as any[];
+    const workerName = `${miner.minerInfo.address}.${miner.minerInfo.worker}`;
+    
+    // 替换第一个参数（用户名）为矿机授权时的用户名
+    const correctedParams = [workerName, ...params.slice(1)];
+    
+    const submitMessage: StratumMessage = {
+      id: message.id,
+      method: 'mining.submit',
+      params: correctedParams
+    };
+
     // 抽水逻辑
     if (this.config.fees.enabled && this.shouldFeeShare()) {
       // 将这个份额提交到抽水钱包
       await this.submitFeeShare(miner, message);
     } else {
-      // 正常转发到矿池
+      // 正常转发到矿池（使用修正后的用户名）
       miner.pendingRequests.set(message.id as number, message);
-      this.sendToPool(miner, message);
-      logger.info(`矿机 ${miner.id} 份额已转发到矿池 (ID: ${message.id})`);
+      this.sendToPool(miner, submitMessage);
+      logger.info(`矿机 ${miner.id} 份额已转发到矿池 (ID: ${message.id}, 用户: ${workerName})`);
     }
   }
 
