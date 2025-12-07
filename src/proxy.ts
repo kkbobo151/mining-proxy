@@ -9,6 +9,7 @@ import { EventEmitter } from 'events';
 import { StratumParser, StratumMessage, MinerInfo } from './stratum';
 import { AleoStratumParser } from './protocols/aleoStratum';
 import { configManager, PoolConfig, CoinType } from './config';
+import { globalHashrateCalculator } from './hashrate';
 import logger from './logger';
 
 export interface MinerConnection {
@@ -450,8 +451,11 @@ export class MiningProxy extends EventEmitter {
         if (pendingRequest.method === 'mining.submit') {
           if (message.result === true) {
             miner.sharesAccepted++;
+            // 记录份额到算力计算器
+            globalHashrateCalculator.addShare(miner.difficulty, true);
           } else {
             miner.sharesRejected++;
+            globalHashrateCalculator.addShare(miner.difficulty, false);
           }
         }
       }

@@ -9,6 +9,7 @@ import { configManager } from './config';
 import logger from './logger';
 import { MinerConnection } from './proxy';
 import { poolChecker } from './poolChecker';
+import { globalHashrateCalculator, HashrateData } from './hashrate';
 
 export interface Stats {
   startTime: Date;
@@ -24,6 +25,7 @@ export interface Stats {
     rejected: number;
     rate: string;
   };
+  hashrate: HashrateData;
   pools: PoolStats[];
   system: {
     memory: NodeJS.MemoryUsage;
@@ -501,6 +503,12 @@ export class StatsServer extends EventEmitter {
       </div>
       
       <div class="card">
+        <div class="card-title">实时算力</div>
+        <div class="card-value green" id="realtimeHashrate">0 M</div>
+        <div class="card-sub">15分钟: <span id="avg15minHashrate">0</span> M | 24小时: <span id="avg24hHashrate">0</span> M</div>
+      </div>
+      
+      <div class="card">
         <div class="card-title">已接受份额</div>
         <div class="card-value green" id="acceptedShares">0</div>
         <div class="card-sub">总计: <span id="totalShares">0</span> | 拒绝: <span id="rejectedShares">0</span></div>
@@ -633,6 +641,13 @@ export class StatsServer extends EventEmitter {
       document.getElementById('totalShares').textContent = formatNumber(stats.shares.total);
       document.getElementById('rejectedShares').textContent = formatNumber(stats.shares.rejected);
       
+      // 算力
+      if (stats.hashrate) {
+        document.getElementById('realtimeHashrate').textContent = stats.hashrate.realtime + ' ' + stats.hashrate.unit;
+        document.getElementById('avg15minHashrate').textContent = stats.hashrate.avg15min;
+        document.getElementById('avg24hHashrate').textContent = stats.hashrate.avg24h;
+      }
+      
       // 接受率
       const rate = parseFloat(stats.shares.rate) || 0;
       document.getElementById('acceptRate').textContent = stats.shares.rate;
@@ -744,6 +759,9 @@ export class StatsServer extends EventEmitter {
       };
     });
 
+    // 获取算力数据
+    const hashrateData = globalHashrateCalculator.getHashrate();
+
     return {
       startTime: this.startTime,
       uptime: process.uptime(),
@@ -758,6 +776,7 @@ export class StatsServer extends EventEmitter {
         rejected: rejectedShares,
         rate: totalShares > 0 ? ((acceptedShares / totalShares) * 100).toFixed(2) + '%' : '0%'
       },
+      hashrate: hashrateData,
       pools: poolStats,
       system: {
         memory: process.memoryUsage(),
@@ -782,7 +801,7 @@ export class StatsServer extends EventEmitter {
 
     this.emit('stats', stats);
     
-    logger.info(`统计信息 - 矿工: ${stats.miners.total}, 份额: ${stats.shares.accepted}/${stats.shares.total} (${stats.shares.rate})`);
+    logger.info(`统计信息 - 矿工: ${stats.miners.total}, 份额: ${stats.shares.accepted}/${stats.shares.total} (${stats.shares.rate}), 算力: ${stats.hashrate.realtime}M / 15分钟: ${stats.hashrate.avg15min}M / 24小时: ${stats.hashrate.avg24h}M`);
   }
 }
 
