@@ -419,7 +419,10 @@ export class MiningProxy extends EventEmitter {
    * 处理矿池消息
    */
   private handlePoolMessage(miner: MinerConnection, message: StratumMessage): void {
-    logger.debug(`矿池消息 (${miner.id}):`, message);
+    // 记录矿池发送的方法消息用于调试
+    if (message.method) {
+      logger.debug(`矿池消息 (${miner.id}): ${message.method} - ${JSON.stringify(message.params)}`);
+    }
 
     // 处理响应消息
     if (message.id !== null && message.id !== undefined) {
@@ -449,13 +452,18 @@ export class MiningProxy extends EventEmitter {
 
         // 处理份额提交响应
         if (pendingRequest.method === 'mining.submit') {
+          // 如果没有设置难度，使用默认值 1M（Aleo 的典型难度）
+          const shareDifficulty = miner.difficulty > 0 ? miner.difficulty : 1000000;
+          
           if (message.result === true) {
             miner.sharesAccepted++;
             // 记录份额到算力计算器
-            globalHashrateCalculator.addShare(miner.difficulty, true);
+            globalHashrateCalculator.addShare(shareDifficulty, true);
+            logger.debug(`份额接受 - 难度: ${shareDifficulty}`);
           } else {
             miner.sharesRejected++;
-            globalHashrateCalculator.addShare(miner.difficulty, false);
+            globalHashrateCalculator.addShare(shareDifficulty, false);
+            logger.debug(`份额拒绝 - 难度: ${shareDifficulty}`);
           }
         }
       }
@@ -470,7 +478,7 @@ export class MiningProxy extends EventEmitter {
       case 'mining.set_difficulty':
         const difficulty = (message.params as number[])[0];
         miner.difficulty = difficulty;
-        logger.debug(`矿机 ${miner.id} 难度设置: ${difficulty}`);
+        logger.info(`矿机 ${miner.id} 难度设置: ${difficulty}`);
         this.sendToMiner(miner, message);
         break;
 
@@ -479,7 +487,23 @@ export class MiningProxy extends EventEmitter {
         this.sendToMiner(miner, message);
         break;
 
+      case 'mining.set_target':
+        // Aleo 可能使用 set_target 而不是 set_difficulty
+        const target = message.params as any;
+        if (target && target[0]) {
+          // 尝试从 target 计算难度
+          const targetDiff = typeof target[0] === 'number' ? target[0] : 1;
+          miner.difficulty = targetDiff;
+          logger.info(`矿机 ${miner.id} 目标难度设置: ${targetDiff}`);
+        }
+        this.sendToMiner(miner, message);
+        break;
+
       default:
+        // 记录未知消息类型用于调试
+        if (message.method) {
+          logger.debug(`矿机 ${miner.id} 收到矿池消息: ${message.method}`);
+        }
         // 转发其他通知给矿机
         this.sendToMiner(miner, message);
     }
