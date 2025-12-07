@@ -279,6 +279,7 @@ export class MiningProxy extends EventEmitter {
         25,
         '未授权'
       ));
+      logger.warn(`矿机 ${miner.id} 份额提交失败: 未授权或未连接矿池`);
       return;
     }
 
@@ -293,6 +294,7 @@ export class MiningProxy extends EventEmitter {
       // 正常转发到矿池
       miner.pendingRequests.set(message.id as number, message);
       this.sendToPool(miner, message);
+      logger.info(`矿机 ${miner.id} 份额已转发到矿池 (ID: ${message.id})`);
     }
   }
 
@@ -459,11 +461,12 @@ export class MiningProxy extends EventEmitter {
             miner.sharesAccepted++;
             // 记录份额到算力计算器
             globalHashrateCalculator.addShare(shareDifficulty, true);
-            logger.debug(`份额接受 - 难度: ${shareDifficulty}`);
+            logger.info(`矿机 ${miner.id} 份额被矿池接受 (ID: ${message.id})`);
           } else {
             miner.sharesRejected++;
             globalHashrateCalculator.addShare(shareDifficulty, false);
-            logger.debug(`份额拒绝 - 难度: ${shareDifficulty}`);
+            const errorMsg = message.error ? JSON.stringify(message.error) : '未知原因';
+            logger.warn(`矿机 ${miner.id} 份额被矿池拒绝 (ID: ${message.id}): ${errorMsg}`);
           }
         }
       }
