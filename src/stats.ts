@@ -204,8 +204,8 @@ export class StatsServer extends EventEmitter {
     const miners = this.getMinersFn ? this.getMinersFn() : [];
     const minersList = miners.map(m => ({
       id: m.id,
-      address: m.minerInfo?.address || 'unknown',
-      worker: m.minerInfo?.worker || 'unknown',
+      address: m.workerName?.split('.')[0] || 'unknown',
+      worker: m.workerName?.split('.').slice(1).join('.') || 'unknown',
       connectedAt: m.connectedAt.toISOString(),
       lastActivity: m.lastActivity.toISOString(),
       sharesSubmitted: m.sharesSubmitted,
@@ -213,8 +213,7 @@ export class StatsServer extends EventEmitter {
       sharesRejected: m.sharesRejected,
       difficulty: m.difficulty,
       pool: m.pool?.name || 'unknown',
-      isAuthorized: m.isAuthorized,
-      isSubscribed: m.isSubscribed
+      isAuthorized: m.isAuthorized
     }));
 
     res.writeHead(200);
@@ -730,8 +729,8 @@ export class StatsServer extends EventEmitter {
 
       return {
         id: m.id,
-        address: m.minerInfo?.address || 'unknown',
-        worker: m.minerInfo?.worker || 'unknown',
+        address: m.workerName?.split('.')[0] || 'unknown',
+        worker: m.workerName?.split('.').slice(1).join('.') || 'unknown',
         connectedAt: m.connectedAt.toISOString(),
         lastActivity: m.lastActivity.toISOString(),
         sharesSubmitted: m.sharesSubmitted,
