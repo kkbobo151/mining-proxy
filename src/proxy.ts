@@ -97,6 +97,9 @@ export class MiningProxy extends EventEmitter {
     const id = `miner_${++this.connectionId}`;
     const remoteAddress = `${socket.remoteAddress}:${socket.remotePort}`;
     
+    // 禁用 Nagle 算法，减少延迟
+    socket.setNoDelay(true);
+    
     logger.info(`新矿机连接: ${id} 来自 ${remoteAddress}`);
 
     const miner: MinerConnection = {
@@ -393,6 +396,9 @@ export class MiningProxy extends EventEmitter {
         port: pool.port
       });
 
+      // 禁用 Nagle 算法，减少延迟
+      poolSocket.setNoDelay(true);
+
       poolSocket.on('connect', () => {
         logger.info(`矿机 ${miner.id} 成功连接到矿池 ${pool.name}`);
         miner.poolSocket = poolSocket;
@@ -501,6 +507,7 @@ export class MiningProxy extends EventEmitter {
       case 'mining.notify':
         // 转发任务通知给矿机
         this.sendToMiner(miner, message);
+        logger.debug(`矿机 ${miner.id} 收到新任务`);
         break;
 
       case 'mining.set_target':
