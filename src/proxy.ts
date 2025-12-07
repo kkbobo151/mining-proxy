@@ -214,10 +214,8 @@ export class MiningProxy extends EventEmitter {
     miner.isSubscribed = true;
     miner.pendingRequests.set(message.id as number, message);
     
-    // 转发订阅请求到矿池
-    const subscribeMsg = StratumParser.createSubscribe('mining-proxy/1.0');
-    subscribeMsg.id = message.id;
-    this.sendToPool(miner, subscribeMsg);
+    // 直接透传矿机的原始订阅请求到矿池
+    this.sendToPool(miner, message);
   }
 
   /**
@@ -262,14 +260,8 @@ export class MiningProxy extends EventEmitter {
 
     miner.pendingRequests.set(message.id as number, message);
 
-    // 使用矿工自己的钱包地址转发授权请求
-    const authorizeMsg = StratumParser.createAuthorize(
-      minerInfo.address,
-      minerInfo.worker,
-      minerInfo.password
-    );
-    authorizeMsg.id = message.id;
-    this.sendToPool(miner, authorizeMsg);
+    // 直接透传矿机的原始授权请求到矿池
+    this.sendToPool(miner, message);
   }
 
   /**
