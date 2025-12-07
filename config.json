@@ -1,28 +1,10 @@
 {
   "proxy": {
     "host": "0.0.0.0",
-    "port": 13333,
+    "port": 3333,
     "maxConnections": 10000
   },
   "pools": [
-    {
-      "name": "F2Pool-ETH",
-      "host": "eth.f2pool.com",
-      "port": 6688,
-      "weight": 1,
-      "enabled": true,
-      "protocol": "stratum",
-      "coin": "eth"
-    },
-    {
-      "name": "Aleo-HeroMiners",
-      "host": "aleo.herominers.com",
-      "port": 1200,
-      "weight": 1,
-      "enabled": true,
-      "protocol": "stratum",
-      "coin": "aleo"
-    },
     {
       "name": "Aleo-F2Pool",
       "host": "aleo.f2pool.com",
@@ -54,4 +36,3 @@
     "apiPort": 8080
   }
 }
-
