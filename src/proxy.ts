@@ -557,7 +557,16 @@ export class MiningProxy extends EventEmitter {
   private sendToPool(miner: MinerConnection, message: StratumMessage): void {
     try {
       if (miner.poolSocket && !miner.poolSocket.destroyed) {
-        miner.poolSocket.write(StratumParser.serialize(message));
+        const data = StratumParser.serialize(message);
+        const success = miner.poolSocket.write(data);
+        if (message.method === 'mining.submit') {
+          logger.info(`[发送到矿池] ${miner.id}: ${data.trim()}`);
+          if (!success) {
+            logger.warn(`[发送到矿池] ${miner.id}: 缓冲区已满，数据可能延迟发送`);
+          }
+        }
+      } else {
+        logger.error(`[发送到矿池] ${miner.id}: 矿池连接不可用 (poolSocket: ${!!miner.poolSocket}, destroyed: ${miner.poolSocket?.destroyed})`);
       }
     } catch (err) {
       logger.error(`发送消息到矿池失败 (${miner.id}):`, err);
