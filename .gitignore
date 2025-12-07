@@ -1,0 +1,32 @@
+# 依赖
+node_modules/
+
+# 编译输出
+dist/
+
+# 日志
+logs/
+*.log
+
+# 环境文件
+.env
+.env.local
+.env.*.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# 本地配置
+config.local.json
+
+# 打包文件
+*.tar.gz
+deploy-package/
+

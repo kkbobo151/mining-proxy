@@ -1,0 +1,36 @@
+{
+  "name": "mining-pool-proxy",
+  "version": "1.0.0",
+  "description": "矿池中转代理系统 - 支持Stratum协议",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts",
+    "start:prod": "NODE_ENV=production node dist/index.js",
+    "monitor": "node dist/monitor.js",
+    "monitor:dev": "ts-node src/monitor.ts"
+  },
+  "keywords": [
+    "mining",
+    "proxy",
+    "stratum",
+    "pool"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "dotenv": "^16.3.1",
+    "winston": "^3.11.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.2"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
+

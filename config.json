@@ -1,0 +1,57 @@
+{
+  "proxy": {
+    "host": "0.0.0.0",
+    "port": 13333,
+    "maxConnections": 10000
+  },
+  "pools": [
+    {
+      "name": "F2Pool-ETH",
+      "host": "eth.f2pool.com",
+      "port": 6688,
+      "weight": 1,
+      "enabled": true,
+      "protocol": "stratum",
+      "coin": "eth"
+    },
+    {
+      "name": "Aleo-HeroMiners",
+      "host": "aleo.herominers.com",
+      "port": 1200,
+      "weight": 1,
+      "enabled": true,
+      "protocol": "stratum",
+      "coin": "aleo"
+    },
+    {
+      "name": "Aleo-F2Pool",
+      "host": "aleo.f2pool.com",
+      "port": 4400,
+      "weight": 1,
+      "enabled": true,
+      "protocol": "stratum",
+      "coin": "aleo"
+    }
+  ],
+  "wallet": {
+    "address": "YOUR_WALLET_ADDRESS",
+    "workerPrefix": "proxy"
+  },
+  "fees": {
+    "enabled": false,
+    "percent": 1.0,
+    "wallet": "FEE_WALLET_ADDRESS"
+  },
+  "logging": {
+    "level": "info",
+    "file": "logs/proxy.log",
+    "maxSize": "10m",
+    "maxFiles": 5
+  },
+  "stats": {
+    "enabled": true,
+    "interval": 60,
+    "apiPort": 8080
+  }
+}
+
